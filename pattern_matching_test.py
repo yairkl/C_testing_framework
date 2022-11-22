@@ -1,7 +1,10 @@
 from os.path import join, exists 
 import re
 import pytest
-from utils import compile_run_program, interactive_program, cmake_build
+from utils import compile_run_program, interactive_program, cmake_build, check_coverage
+
+path = "/home/yair/vsCodeProjects/Exercises/apps_in_networks/ex1"
+
 
 def string_match_ref(string, patterns):
     matchs = []
@@ -11,18 +14,19 @@ def string_match_ref(string, patterns):
     return sorted(matchs, key=lambda x: (x['start'], x['end'], x['match']))
 
 tests = [
-    ("aabbababbab",['aab','aba','baa']),
+    ("aabbababbab",['aab', 'aba', 'baa']),
     ("abccbabbba",['a','b','c']),
     ("xyzabcabde",[ "abc", "bca", "cab", "acb"]),
     ("aaaaaaaa",['a','aa','aaa','aaaa', 'aaaaaaaaaaaaaa']),
-    ("",['an de']),
+    ("xyzabcabde",['yzabc','zab']),
+    ("xyzabcabde",['xyzabc','zabc','zab']),
+    ("xyzabcabde",['zxy','zxy']),
 ]
 
 @pytest.mark.parametrize('params', tests)
 def test_string_match(request,params):
     string, patterns = params
     
-    path = "../apps_in_networks/ex1"
     files = [join(path,file) for file in ['main.c', 'slist.c','pattern_matching.c']]
     outdir = f'workloads/string_match/{request.node.name}'
 
@@ -38,4 +42,17 @@ def test_string_match(request,params):
     
     # Incorrect output
     assert matchs_imp == matchs_ref
-    
+
+def test_string_match_coverage(request):
+    files = [join(path,file) for file in ['main.c', 'slist.c','pattern_matching.c']]
+    outdir = f'workloads/string_match_coverage/{request.node.name}'
+
+    tests_argv = [ [string,*patterns] for string, patterns in tests]
+
+    res, uncovered = check_coverage(files, tests_argv, cwd=outdir)
+
+    print(uncovered)
+    print(res)
+
+    # Incorrect coverage
+    assert len(uncovered) == 0
