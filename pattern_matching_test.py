@@ -21,6 +21,8 @@ tests = [
     ("xyzabcabde",['yzabc','zab']),
     ("xyzabcabde",['xyzabc','zabc','zab']),
     ("xyzabcabde",['zxy','zxy']),
+    ("the quick brown fox hoped over the red wall",['the','the quick','quick']),
+    ("",[]),
 ]
 
 @pytest.mark.parametrize('params', tests)
